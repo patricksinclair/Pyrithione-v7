@@ -3,6 +3,7 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class BioSystem {
 
@@ -14,10 +15,11 @@ public class BioSystem {
     private ArrayList<Microhabitat> microhabitats;
     private double timeElapsed;
     private double tau; //timestep used in tau-leaping
-    private double immigration_rate = 2880.;
+    //private double immigration_rate = 2.7e-4*2880.;
+    private double immigration_rate = 7.2;
     private double migration_rate = 0.2;
     private double attachment_rate = 2000.;
-    private double detachment_rate = 1.38;
+    private double detachment_rate = 1.38*0.08;
     private double delta_x = 5.;
     private int immigration_index, biofilm_edge_index;
 
@@ -57,6 +59,14 @@ public class BioSystem {
 
     public int getBiofilmThickness(){
         return microhabitats.size();
+    }
+
+    public int getFormedBiofilmThickness(){
+        int bf_counter = 0;
+        for(Microhabitat m : microhabitats){
+            if(m.isBiofilm_region()) bf_counter++;
+        }
+        return bf_counter;
     }
 
     public double[] populationDistribution(){
@@ -294,6 +304,166 @@ public class BioSystem {
             bs.performAction();
 
         }
-
     }
+
+
+
+
+
+
+
+    public static int getThicknessReachedAfterATime(double duration, int i){
+        int K = 500;
+        double c_max = 10., alpha = 0.01, tau = 0.01;
+
+        BioSystem bs = new BioSystem(K, alpha, c_max, tau);
+        int nUpdates = 20;
+        double interval = duration/nUpdates;
+        boolean alreadyRecorded = false;
+
+        while(bs.timeElapsed <= duration){
+
+
+            if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
+
+                int max_poss_pop = bs.getBiofilmThickness()*K;
+                int total_N = bs.getTotalN();
+                System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
+
+                alreadyRecorded = true;
+            }
+            if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
+
+            bs.performAction();
+        }
+
+        return bs.getBiofilmEdge();
+    }
+
+
+    public static void getBiofilmThicknessHistoInParallel(int nReps){
+        long startTime = System.currentTimeMillis();
+
+        int K = 500, L = 500;
+        double c_max = 10., alpha = 0.01, tau = 0.01;
+
+        double duration = 1680.; //10 week duration
+
+
+        int[] mh_index_reached = new int[nReps];
+        String index_reached_filename = "pyrithione-testing-mh_index_reached_histo-t="+String.valueOf(duration)+"-parallel";
+
+        IntStream.range(0, nReps).parallel().forEach(i -> mh_index_reached[i] = BioSystem.getThicknessReachedAfterATime(duration, i));
+
+        Toolbox.writeHistoArrayToFile(index_reached_filename, mh_index_reached);
+
+        long finishTime = System.currentTimeMillis();
+        String diff = Toolbox.millisToShortDHMS(finishTime - startTime);
+        System.out.println("results written to file");
+        System.out.println("Time taken: "+diff);
+    }
+
+
+
+    public static DataBox getAllData(int i){
+
+        int K = 500;
+        double c_max = 10., alpha = 0.01, tau = 0.01;
+
+        int nMeasurements = 40;
+        double duration = 200., interval = duration/nMeasurements;
+
+        BioSystem bs = new BioSystem(K, alpha, c_max, tau);
+
+        boolean alreadyRecorded = false;
+        int timerCounter = 0;
+
+        double[] popSizes = new double[nMeasurements+1];
+        double[][] popDistbs = new double[nMeasurements+1][];
+        double[] biofilmEdges = new double[nMeasurements+1];
+        double[][] avgGenotypeDistbs = new double[nMeasurements+1][];
+        double[][] genoStDevs = new double[nMeasurements+1][];
+
+        while(bs.timeElapsed <= duration+0.02*interval){
+
+            if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
+
+                int max_poss_pop = bs.getBiofilmThickness()*K;
+                int total_N = bs.getTotalN();
+
+                System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
+
+                /*popSizes[timerCounter] = total_N;
+                popDistbs[timerCounter] = bs.getPopulationDistribution();
+                biofilmEdges[timerCounter] = bs.getBiofilmEdge();
+                avgGenotypeDistbs[timerCounter] = bs.getAvgGenotypeDistribution();
+                genoStDevs[timerCounter] = bs.getStDevOfGenotypeDistribution();*/
+
+                alreadyRecorded = true;
+                timerCounter++;
+            }
+            if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
+
+            bs.performAction();
+        }
+
+        return new DataBox(popSizes, popDistbs, biofilmEdges, avgGenotypeDistbs, genoStDevs);
+    }
+
+
+    public static void getInfoInParallel(){
+
+        long startTime = System.currentTimeMillis();
+
+        int K = 500, L = 500;
+        double c_max = 10., alpha = 0.01, tau = 0.01;
+
+        int nReps = 16;
+        double duration = 200.;
+
+        double[][] allPopSizes = new double[nReps][];
+        double[][][] allPopDistbs = new double[nReps][][];
+        double[][] allBiofilmEdges = new double[nReps][];
+        double[][][] allAvgGenotypeDistbs = new double[nReps][][];
+        double[][][] allGenoStDevs = new double[nReps][][];
+
+        String popSizeFilename = "pyrithione-testing-pop_size-t="+String.valueOf(duration)+"-parallel";
+        String popDistbFilename = "pyrithione-testing-pop_distb-t="+String.valueOf(duration)+"-parallel";
+        String biofilmEdgeFilename = "pyrithione-testing-biofilm_edge-t="+String.valueOf(duration)+"-parallel";
+        String avgGenotypeDistbFilename = "pyrithione-testing-avgGenoDistb-t="+String.valueOf(duration)+"-parallel";
+        String genoStDevDistbFilename = "pyrithione-testing-genoStDevDistb-t="+String.valueOf(duration)+"-parallel";
+
+        //double[][][] allAvgGenotypeDistbs = new double[nReps][][];
+        DataBox[] dataBoxes = new DataBox[nReps];
+
+        IntStream.range(0, nReps).parallel().forEach(i -> dataBoxes[i] = BioSystem.getAllData(i));
+
+        for(int j = 0; j < dataBoxes.length; j++){
+            allPopSizes[j] = dataBoxes[j].getPopSizes();
+            allPopDistbs[j] = dataBoxes[j].getPopDistbs();
+            allBiofilmEdges[j] = dataBoxes[j].getBiofilmEdges();
+            allAvgGenotypeDistbs[j] = dataBoxes[j].getAvgGenotypeDistbs();
+            allGenoStDevs[j] = dataBoxes[j].getGenoStDevs();
+        }
+
+        double[] processedPopSizes = Toolbox.averagedResults(allPopSizes);
+        double[][] processedPopDistbs = Toolbox.averagedResults(allPopDistbs);
+        double[] processedBiofilmEdges = Toolbox.averagedResults(allBiofilmEdges);
+        double[][] processedAvgGenotypeDistbs = Toolbox.averagedResults(allAvgGenotypeDistbs);
+        double[][] processedGenoStDevs = Toolbox.averagedResults(allGenoStDevs);
+
+        Toolbox.writeAveragedArrayToFile(popSizeFilename, processedPopSizes);
+        Toolbox.writeAveragedDistbsToFile(popDistbFilename, processedPopDistbs);
+        Toolbox.writeAveragedArrayToFile(biofilmEdgeFilename, processedBiofilmEdges);
+        Toolbox.writeAveragedDistbsToFile(avgGenotypeDistbFilename, processedAvgGenotypeDistbs);
+        Toolbox.writeAveragedDistbsToFile(genoStDevDistbFilename, processedGenoStDevs);
+
+        long finishTime = System.currentTimeMillis();
+
+        String diff = Toolbox.millisToShortDHMS(finishTime - startTime);
+
+        System.out.println("results written to file");
+        System.out.println("Time taken: "+diff);
+    }
+
 }
