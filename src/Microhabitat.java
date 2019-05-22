@@ -90,7 +90,7 @@ public class Microhabitat {
 
     public double replicationOrDeathRate(int index){
         //TODO this isn't quite right I think. it's allowing for growth above N = K //think it's sorted now
-        double phi_c_scaled = 0.084*(phi_c(index));
+        double phi_c_scaled = 0.083*(phi_c(index));
         //double return_val = (phi_c(index) > 0.) ? phi_c(index)*(1. - getN()/(double)K) : phi_c(index);
         double return_val2 = (phi_c(index) > 0.) ? phi_c_scaled*(1. - getN()/(double)K) : phi_c_scaled;
         return return_val2;
