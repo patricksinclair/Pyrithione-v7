@@ -287,8 +287,8 @@ public class BioSystem {
         }
         //System.out.println(n_immigrants);
         //if(n_immigrants > 0)System.out.println("n_immigrants: "+n_immigrants);
-        System.out.println("\ndetachments");
-        System.out.println(Arrays.toString(detachment_allocations) + "\n");
+        //System.out.println("\ndetachments");
+        //System.out.println(Arrays.toString(detachment_allocations) + "\n");
         immigrate(immigration_index, n_immigrants);
         updateBiofilmSize();
         timeElapsed += tau_step;
