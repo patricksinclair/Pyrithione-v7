@@ -24,6 +24,15 @@ public class Toolbox {
         }
     }
 
+    public static double averageOfArray(double[] results){
+        double sum = 0.;
+
+        for(double d : results){
+            sum += d;
+        }
+        return sum/results.length;
+    }
+
 
     public static double stDevOfArrayList(ArrayList<Double> listo){
 
@@ -158,6 +167,29 @@ public class Toolbox {
         }catch (IOException e){}
 
     }
+
+
+    public static void writeThreeArraysToFile(String filename, double[] arr_a, double[] arr_b, double[] arr_c){
+
+        try{
+            File file = new File(filename+".txt");
+            if(!file.exists()) file.createNewFile();
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+
+
+            for(int i = 0; i < arr_a.length; i++){
+                String output = String.format("%.3f, %.3f, %.3f", arr_a[i], arr_b[i], arr_c[i]);
+                bw.write(output);
+                bw.newLine();
+            }
+            bw.close();
+
+        }catch (IOException e){}
+
+    }
+
 
 
     public static String millisToShortDHMS(long duration) {

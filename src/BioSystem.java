@@ -10,35 +10,53 @@ public class BioSystem {
 
     Random rand = new Random();
 
-    private int L, K; //length, karrying kapacity
+    private int K; //karrying kapacity
     private double alpha, c_max; //steepness of antimicrobial gradient, max concn
     private ArrayList<Microhabitat> microhabitats;
     private double timeElapsed;
-    private double tau; //timestep used in tau-leaping
-    //private double immigration_rate = 2.7e-4*2880.;
-    private double immigration_rate = 7.2;
+    private double tau = 0.01; //timestep used in tau-leaping
+    private double immigration_rate =  0.8;
+    //private double immigration_rate = 7.2;
     private double migration_rate = 0.2;
-    private double attachment_rate = 2000.;
-    private double detachment_rate = 1.38*0.08;
+    private double detachment_rate;
     private double delta_x = 5.;
     private int immigration_index, biofilm_edge_index;
+    //private int no_of_detachments = 0;
 
 
-    public BioSystem(int K, double alpha, double c_max, double tau){
+    public BioSystem(double alpha, double c_max){
 
-        this.K = K;
+        this.K = 120;
         this.alpha = alpha;
-        this.c_max = c_max;
-        this.tau = tau;
+        this.c_max = 0;
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
+        this.detachment_rate = 0.04;
 
-        microhabitats.add(new Microhabitat(K, calc_C_i(0, c_max, alpha, delta_x), migration_rate));
+        microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
 
         microhabitats.get(0).setSurface(true);
-        microhabitats.get(0).addARandomBacterium_x_N(25);
+        microhabitats.get(0).addARandomBacterium_x_N(5);
     }
+
+    public BioSystem(double alpha, double c_max, double detachment_rate){
+
+        this.K = 120;
+        this.alpha = alpha;
+        this.c_max = 0;
+        this.microhabitats = new ArrayList<>();
+        this.timeElapsed = 0.;
+        this.immigration_index = 0;
+        this.detachment_rate = detachment_rate;
+
+        microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
+
+        microhabitats.get(0).setSurface(true);
+        microhabitats.get(0).addARandomBacterium_x_N(5);
+    }
+
+
 
 
     public double getTimeElapsed(){
@@ -75,6 +93,14 @@ public class BioSystem {
             popsizes[i] = microhabitats.get(i).getN();
         }
         return popsizes;
+    }
+
+    public double[] concnProfile(){
+        double[] c_vals = new double[microhabitats.size()];
+        for(int i = 0; i < microhabitats.size(); i++){
+            c_vals[i] = microhabitats.get(i).getC();
+        }
+        return c_vals;
     }
 
     public boolean[] biofilmProfile(){
@@ -187,7 +213,9 @@ public class BioSystem {
                     ///////////// DETACHMENTS /////////////////////////
                     if(mh_index == immigration_index){
                         detachment_allocations[bac_index] = new PoissonDistribution(detachment_rate*tau_step).sample();
+                        //no_of_detachments += detachment_allocations[bac_index];
                         if(detachment_allocations[bac_index] > 1){
+                            //no_of_detachments -= detachment_allocations[bac_index];
                             tau_step /= 2.;
                             continue whileloop;
                         }
@@ -258,6 +286,9 @@ public class BioSystem {
             }
         }
         //System.out.println(n_immigrants);
+        //if(n_immigrants > 0)System.out.println("n_immigrants: "+n_immigrants);
+        System.out.println("\ndetachments");
+        System.out.println(Arrays.toString(detachment_allocations) + "\n");
         immigrate(immigration_index, n_immigrants);
         updateBiofilmSize();
         timeElapsed += tau_step;
@@ -274,12 +305,12 @@ public class BioSystem {
 
         double duration = 240.;
 
-        int K = 500;
+        int K = 120;
         double c_max = 10.;
         double alpha = 1e-4;
         double tau = 0.01;
 
-        BioSystem bs = new BioSystem(K, alpha, c_max, tau);
+        BioSystem bs = new BioSystem(alpha, c_max);
         //System.out.println(Arrays.toString(bs.getConcentrationProfile())+"\n");
 
         while(bs.getTimeElapsed() <= duration) {
@@ -295,6 +326,8 @@ public class BioSystem {
                         bs.getTimeElapsed(), bs.getTotalN(), bs.getBiofilmEdge());
 
                 System.out.println(output);
+                System.out.println("\nconcn profile");
+                System.out.println(Arrays.toString(bs.concnProfile()));
                 System.out.println("\nN distb");
                 System.out.println(Arrays.toString(bs.populationDistribution()) + "\n");
                 System.out.println("Biofilm y/n?");
@@ -302,8 +335,8 @@ public class BioSystem {
                 System.out.println("-----------------------------------------------------------------------------------------------");
             }
             bs.performAction();
-
         }
+        //System.out.println(bs.no_of_detachments);
     }
 
 
@@ -313,10 +346,10 @@ public class BioSystem {
 
 
     public static int getThicknessReachedAfterATime(double duration, int i){
-        int K = 500;
-        double c_max = 10., alpha = 0.01, tau = 0.01;
+        int K = 120;
+        double c_max = 10., alpha = 0.01;
 
-        BioSystem bs = new BioSystem(K, alpha, c_max, tau);
+        BioSystem bs = new BioSystem(alpha, c_max);
         int nUpdates = 20;
         double interval = duration/nUpdates;
         boolean alreadyRecorded = false;
@@ -344,7 +377,6 @@ public class BioSystem {
     public static void getBiofilmThicknessHistoInParallel(int nReps){
         long startTime = System.currentTimeMillis();
 
-        int K = 500, L = 500;
         double c_max = 10., alpha = 0.01, tau = 0.01;
 
         double duration = 1680.; //10 week duration
@@ -367,13 +399,13 @@ public class BioSystem {
 
     public static DataBox getAllData(int i){
 
-        int K = 500;
+        int K = 120;
         double c_max = 10., alpha = 0.01, tau = 0.01;
 
         int nMeasurements = 40;
         double duration = 200., interval = duration/nMeasurements;
 
-        BioSystem bs = new BioSystem(K, alpha, c_max, tau);
+        BioSystem bs = new BioSystem(alpha, c_max);
 
         boolean alreadyRecorded = false;
         int timerCounter = 0;
@@ -415,7 +447,7 @@ public class BioSystem {
 
         long startTime = System.currentTimeMillis();
 
-        int K = 500, L = 500;
+        int K = 120, L = 500;
         double c_max = 10., alpha = 0.01, tau = 0.01;
 
         int nReps = 16;
@@ -464,6 +496,72 @@ public class BioSystem {
 
         System.out.println("results written to file");
         System.out.println("Time taken: "+diff);
+    }
+
+
+    public static int[] optimalDetachmentSubSubroutine(double d_rate, double timelimit, int i){
+        //this plays a biosystem to completion of one rep for a specified detachment rate
+        //returns the thickness and pop size of this one rep
+        System.out.println("d_rate: "+d_rate+"\trep: "+i);
+        double alpha = 0.01, c_max = 0.;
+
+        BioSystem bs = new BioSystem(alpha, c_max, d_rate);
+        while(bs.timeElapsed <= timelimit){
+            bs.performAction();
+        }
+
+        return new int[]{bs.getBiofilmThickness(), bs.getTotalN()};
+    }
+
+
+    public static double[] optimalDetachmentSubroutine(double d_rate, double timelimit, int nReps){
+        //this runs several reps of a biosystem for a given detachment rate
+        //returns the average thickness and pop size of these reps.
+
+        int[][] sub_results = new int[nReps][];
+        double[] bf_thicknesses = new double[nReps];
+        double[] pop_sizes = new double[nReps];
+        double alpha = 0.01, c_max = 0.;
+
+        IntStream.range(0, nReps).parallel().forEach(i -> sub_results[i] = BioSystem.optimalDetachmentSubSubroutine(d_rate, timelimit, i));
+
+        for(int r = 0; r < nReps; r++){
+            bf_thicknesses[r] = sub_results[r][0];
+            pop_sizes[r] = sub_results[r][1];
+        }
+
+        double avg_thickness = Toolbox.averageOfArray(bf_thicknesses);
+        double avg_popsize = Toolbox.averageOfArray(pop_sizes);
+
+        return new double[]{avg_thickness, avg_popsize};
+    }
+
+
+
+    public static void findOptimalDetachmentRate(){
+
+        double min_detachment = 0.01, max_detachment = 0.5, detach_increment = 0.01;
+        int n_detachments = (int)((max_detachment-min_detachment)/detach_increment);
+        int nReps = 8;
+        double duration = 240.;
+
+        String filename = "optimal_detach_rates-thickness-popSize";
+
+        double[] dRateArray = new double[n_detachments+1];
+        double[] thickness_array = new double[n_detachments+1];
+        double[] popsize_array = new double[n_detachments+1];
+
+        for(int i = 0; i <= n_detachments; i++){
+            dRateArray[i] = min_detachment + i*detach_increment;
+
+            double[] subroutine_findings = BioSystem.optimalDetachmentSubroutine(dRateArray[i], duration, nReps);
+
+            thickness_array[i] = subroutine_findings[0];
+            popsize_array[i] = subroutine_findings[1];
+        }
+
+        Toolbox.writeThreeArraysToFile(filename, dRateArray, thickness_array, popsize_array);
+
     }
 
 }
