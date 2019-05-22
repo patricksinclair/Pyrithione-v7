@@ -504,9 +504,22 @@ public class BioSystem {
         //returns the thickness and pop size of this one rep
         System.out.println("d_rate: "+d_rate+"\trep: "+i);
         double alpha = 0.01, c_max = 0.;
+        boolean alreadyRecorded = false;
+        int nMeasurements = 10;
+        double interval = timelimit/nMeasurements;
 
         BioSystem bs = new BioSystem(alpha, c_max, d_rate);
         while(bs.timeElapsed <= timelimit){
+
+            if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
+
+                int total_N = bs.getTotalN();
+                System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"\tbf_edge: "+bs.getBiofilmEdge());
+                alreadyRecorded = true;
+            }
+
+            if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
+            
             bs.performAction();
         }
 
