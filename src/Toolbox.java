@@ -24,13 +24,20 @@ public class Toolbox {
         }
     }
 
-    public static double averageOfArray(double[] results){
+    public static double[] averageAndStDevOfArray(double[] results){
         double sum = 0.;
-
         for(double d : results){
             sum += d;
         }
-        return sum/results.length;
+        double mean = sum/results.length;
+
+        double sumSq = 0.;
+        for(double d : results){
+            sumSq +=(d-mean)*(d-mean);
+        }
+        double stDev = Math.sqrt(sumSq/(results.length - 1));
+
+        return new double[]{mean, stDev};
     }
 
 
@@ -188,6 +195,36 @@ public class Toolbox {
 
         }catch (IOException e){}
 
+    }
+
+
+    public static void writeMultipleColumnsToFile(String filename, double[][] results){
+
+        try{
+            File file = new File(filename+".txt");
+            if(!file.exists()) file.createNewFile();
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            int ncols = results.length;
+
+
+            for(int i = 0; i < results[0].length; i++){
+
+                String output = "";
+
+                for(int nc = 0; nc < ncols-1; nc++){
+                    output += String.format("%.4f, ", results[nc][i]);
+                }
+                output += String.format("%.4f", results[ncols-1][i]);
+
+                bw.write(output);
+                bw.newLine();
+            }
+            bw.close();
+
+        }catch (IOException e){}
     }
 
 

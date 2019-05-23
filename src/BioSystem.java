@@ -521,14 +521,14 @@ public class BioSystem {
 
             bs.performAction();
         }
-
+        //System.out.println("TIME ELAPSED: "+bs.timeElapsed);
         return new int[]{bs.getBiofilmThickness(), bs.getTotalN()};
     }
 
 
     public static double[] optimalDetachmentSubroutine(double d_rate, double timelimit, int nReps){
         //this runs several reps of a biosystem for a given detachment rate
-        //returns the average thickness and pop size of these reps.
+        //returns the average and stdev of the thickness and pop size of these reps.
 
         int[][] sub_results = new int[nReps][];
         double[] bf_thicknesses = new double[nReps];
@@ -542,10 +542,12 @@ public class BioSystem {
             pop_sizes[r] = sub_results[r][1];
         }
 
-        double avg_thickness = Toolbox.averageOfArray(bf_thicknesses);
-        double avg_popsize = Toolbox.averageOfArray(pop_sizes);
+        double[] thickness_avg_stDev = Toolbox.averageAndStDevOfArray(bf_thicknesses);
+        double[] popsize_avg_stDev = Toolbox.averageAndStDevOfArray(pop_sizes);
+        double thickness_avg = thickness_avg_stDev[0], thickness_stDev = thickness_avg_stDev[1];
+        double popsize_avg = popsize_avg_stDev[0], popsize_stDev = popsize_avg_stDev[1];
 
-        return new double[]{avg_thickness, avg_popsize};
+        return new double[]{thickness_avg, thickness_stDev, popsize_avg, popsize_stDev};
     }
 
 
@@ -554,26 +556,31 @@ public class BioSystem {
 
         double min_detachment = 0.04, max_detachment = 0.06, detach_increment = 0.001;
         int n_detachments = (int)((max_detachment-min_detachment)/detach_increment);
-        int nReps = 8;
+        int nReps = 10;
         double duration = 240.;
 
-        String filename = "optimal_detach_rates-thickness-popSize-preciser";
+        String filename = "optimal_detach_rates-thickness-popSize-precise-w_errors";
 
         double[] dRateArray = new double[n_detachments+1];
-        double[] thickness_array = new double[n_detachments+1];
-        double[] popsize_array = new double[n_detachments+1];
+        double[] thickness_array_avg = new double[n_detachments+1];
+        double[] thickness_array_stDev = new double[n_detachments+1];
+        double[] popsize_array_avg = new double[n_detachments+1];
+        double[] popsize_array_stDev = new double[n_detachments+1];
 
         for(int i = 0; i <= n_detachments; i++){
             dRateArray[i] = min_detachment + i*detach_increment;
 
             double[] subroutine_findings = BioSystem.optimalDetachmentSubroutine(dRateArray[i], duration, nReps);
 
-            thickness_array[i] = subroutine_findings[0];
-            popsize_array[i] = subroutine_findings[1];
+            thickness_array_avg[i] = subroutine_findings[0];
+            thickness_array_stDev[i] = subroutine_findings[1];
+            popsize_array_avg[i] = subroutine_findings[2];
+            popsize_array_stDev[i] = subroutine_findings[3];
         }
 
-        Toolbox.writeThreeArraysToFile(filename, dRateArray, thickness_array, popsize_array);
+        double[][] collated_results = new double[][]{dRateArray, thickness_array_avg, thickness_array_stDev, popsize_array_avg, popsize_array_stDev};
 
+        Toolbox.writeMultipleColumnsToFile(filename, collated_results);
     }
 
 }
