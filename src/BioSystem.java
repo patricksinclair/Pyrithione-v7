@@ -554,12 +554,12 @@ public class BioSystem {
 
     public static void findOptimalDetachmentRate(){
 
-        double min_detachment = 0.04, max_detachment = 0.06, detach_increment = 0.001;
+        double min_detachment = 0.049, max_detachment = 0.051, detach_increment = 0.0001;
         int n_detachments = (int)((max_detachment-min_detachment)/detach_increment);
         int nReps = 10;
         double duration = 240.;
 
-        String filename = "optimal_detach_rates-thickness-popSize-precise-w_errors";
+        String filename = "optimal_detach_rates-thickness-popSize-precisest-w_errors";
 
         double[] dRateArray = new double[n_detachments+1];
         double[] thickness_array_avg = new double[n_detachments+1];
