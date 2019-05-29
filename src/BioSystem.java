@@ -67,6 +67,8 @@ public class BioSystem {
 
     public int getN_i(int index){return microhabitats.get(index).getN();}
 
+    public double getDetachment_rate(){return detachment_rate;}
+
     public int getTotalN(){
         int runningTotal = 0;
         for(Microhabitat m : microhabitats) {
@@ -513,7 +515,7 @@ public class BioSystem {
             if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
 
                 int total_N = bs.getTotalN();
-                System.out.println("d_rate: "+d_rate+"\trep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"\tbf_edge: "+bs.getBiofilmEdge());
+                System.out.println("d_rate: "+bs.getDetachment_rate()+"\trep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"\tbf_edge: "+bs.getBiofilmEdge());
                 alreadyRecorded = true;
             }
 
@@ -554,12 +556,12 @@ public class BioSystem {
 
     public static void findOptimalDetachmentRate(){
 
-        double min_detachment = 0.049, max_detachment = 0.051, detach_increment = 0.0001;
+        double min_detachment = 0.051, max_detachment = 0.0525, detach_increment = 0.0001;
         int n_detachments = (int)((max_detachment-min_detachment)/detach_increment);
-        int nReps = 10;
+        int nReps = 20;
         double duration = 240.;
 
-        String filename = "optimal_detach_rates-thickness-popSize-precisest-w_errors";
+        String filename = "optimal_detach_rates-thickness-popSize-precisest-w_errors-secondInterval";
 
         double[] dRateArray = new double[n_detachments+1];
         double[] thickness_array_avg = new double[n_detachments+1];
