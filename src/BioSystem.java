@@ -16,9 +16,8 @@ public class BioSystem {
     private double timeElapsed;
     private double tau = 0.01; //timestep used in tau-leaping
     private double immigration_rate =  0.8;
-    //private double immigration_rate = 7.2;
     private double migration_rate = 0.2;
-    private double detachment_rate;
+    private double deterioration_rate = 0.0522;
     private double delta_x = 5.;
     private int immigration_index, biofilm_edge_index;
     //private int no_of_detachments = 0;
@@ -28,19 +27,18 @@ public class BioSystem {
 
         this.K = 120;
         this.alpha = alpha;
-        this.c_max = 0;
+        this.c_max = c_max;
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
-        this.detachment_rate = 0.04;
+        this.deterioration_rate = 0.052;
 
         microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
-
         microhabitats.get(0).setSurface(true);
         microhabitats.get(0).addARandomBacterium_x_N(5);
     }
 
-    public BioSystem(double alpha, double c_max, double detachment_rate){
+    /*public BioSystem(double alpha, double c_max, double detachment_rate){
 
         this.K = 120;
         this.alpha = alpha;
@@ -48,13 +46,13 @@ public class BioSystem {
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
-        this.detachment_rate = detachment_rate;
+        this.deterioration_rate = detachment_rate;
 
         microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
 
         microhabitats.get(0).setSurface(true);
         microhabitats.get(0).addARandomBacterium_x_N(5);
-    }
+    }*/
 
 
 
@@ -67,7 +65,7 @@ public class BioSystem {
 
     public int getN_i(int index){return microhabitats.get(index).getN();}
 
-    public double getDetachment_rate(){return detachment_rate;}
+    public double getDeterioration_rate(){return deterioration_rate;}
 
     public int getTotalN(){
         int runningTotal = 0;
@@ -214,7 +212,7 @@ public class BioSystem {
 
                     ///////////// DETACHMENTS /////////////////////////
                     if(mh_index == immigration_index){
-                        detachment_allocations[bac_index] = new PoissonDistribution(detachment_rate*tau_step).sample();
+                        detachment_allocations[bac_index] = new PoissonDistribution(deterioration_rate*tau_step).sample();
                         //no_of_detachments += detachment_allocations[bac_index];
                         if(detachment_allocations[bac_index] > 1){
                             //no_of_detachments -= detachment_allocations[bac_index];
@@ -314,6 +312,7 @@ public class BioSystem {
 
         BioSystem bs = new BioSystem(alpha, c_max);
         //System.out.println(Arrays.toString(bs.getConcentrationProfile())+"\n");
+        System.out.println(bs.deterioration_rate);
 
         while(bs.getTimeElapsed() <= duration) {
 
@@ -356,18 +355,17 @@ public class BioSystem {
         double interval = duration/nUpdates;
         boolean alreadyRecorded = false;
 
-        while(bs.timeElapsed <= duration){
 
+        while(bs.timeElapsed <= duration){
 
             if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
 
                 int max_poss_pop = bs.getBiofilmThickness()*K;
-                int total_N = bs.getTotalN();
-                System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
-
+                System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
                 alreadyRecorded = true;
             }
             if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
+
 
             bs.performAction();
         }
@@ -381,13 +379,19 @@ public class BioSystem {
 
         double c_max = 10., alpha = 0.01, tau = 0.01;
 
+        int nSections = 8; //number of sections the reps will be divided into, to avoid using loadsa resources
+        int nRuns = nReps/nSections; //number of runs in each section
+
         double duration = 1680.; //10 week duration
 
 
         int[] mh_index_reached = new int[nReps];
         String index_reached_filename = "pyrithione-testing-mh_index_reached_histo-t="+String.valueOf(duration)+"-parallel";
 
-        IntStream.range(0, nReps).parallel().forEach(i -> mh_index_reached[i] = BioSystem.getThicknessReachedAfterATime(duration, i));
+        for(int j = 0; j < nSections; j++){
+            IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i -> mh_index_reached[i] = BioSystem.getThicknessReachedAfterATime(duration, i));
+        }
+
 
         Toolbox.writeHistoArrayToFile(index_reached_filename, mh_index_reached);
 
@@ -501,7 +505,7 @@ public class BioSystem {
     }
 
 
-    public static int[] optimalDetachmentSubSubroutine(double d_rate, double timelimit, int i){
+   /* public static int[] optimalDetachmentSubSubroutine(double d_rate, double timelimit, int i){
         //this plays a biosystem to completion of one rep for a specified detachment rate
         //returns the thickness and pop size of this one rep
         double alpha = 0.01, c_max = 0.;
@@ -515,7 +519,7 @@ public class BioSystem {
             if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
 
                 int total_N = bs.getTotalN();
-                System.out.println("d_rate: "+bs.getDetachment_rate()+"\trep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"\tbf_edge: "+bs.getBiofilmEdge());
+                System.out.println("d_rate: "+bs.getDeterioration_rate()+"\trep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"\tbf_edge: "+bs.getBiofilmEdge());
                 alreadyRecorded = true;
             }
 
@@ -584,5 +588,5 @@ public class BioSystem {
 
         Toolbox.writeMultipleColumnsToFile(filename, collated_results);
     }
-
+*/
 }

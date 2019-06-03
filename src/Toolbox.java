@@ -29,13 +29,13 @@ public class Toolbox {
         for(double d : results){
             sum += d;
         }
-        double mean = sum/results.length;
+        double mean = sum/(double)results.length;
 
         double sumSq = 0.;
         for(double d : results){
             sumSq +=(d-mean)*(d-mean);
         }
-        double stDev = Math.sqrt(sumSq/(results.length - 1));
+        double stDev = Math.sqrt(sumSq/(results.length - 1.));
 
         return new double[]{mean, stDev};
     }
@@ -114,13 +114,15 @@ public class Toolbox {
 
             int nReadings = inputData.length;
 
-            for(int i = 0; i < nReadings; i++){
+            for(int i = 0; i < nReadings-1; i++){
 
                 String output = String.format("%d", inputData[i]);
 
                 bw.write(output);
                 bw.newLine();
             }
+            String output = String.format("%d", inputData[nReadings-1]);
+            bw.write(output);
             bw.close();
         }catch (IOException e){}
     }
