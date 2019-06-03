@@ -31,7 +31,7 @@ public class BioSystem {
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
-        this.deterioration_rate = 0.052;
+        //this.deterioration_rate = 0.0522;
 
         microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
         microhabitats.get(0).setSurface(true);
