@@ -29,7 +29,7 @@ public class Toolbox {
         for(double d : results){
             sum += d;
         }
-        double mean = sum/(double)results.length;
+        double mean = sum/results.length;
 
         double sumSq = 0.;
         for(double d : results){

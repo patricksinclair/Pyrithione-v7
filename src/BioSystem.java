@@ -17,7 +17,7 @@ public class BioSystem {
     private double tau = 0.01; //timestep used in tau-leaping
     private double immigration_rate =  0.8;
     private double migration_rate = 0.2;
-    private double deterioration_rate = 0.0522;
+    private double deterioration_rate = 0.04;
     private double delta_x = 5.;
     private int immigration_index, biofilm_edge_index;
     //private int no_of_detachments = 0;
@@ -27,7 +27,7 @@ public class BioSystem {
 
         this.K = 120;
         this.alpha = alpha;
-        this.c_max = c_max;
+        this.c_max = 0.;
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
@@ -38,7 +38,7 @@ public class BioSystem {
         microhabitats.get(0).addARandomBacterium_x_N(5);
     }
 
-    /*public BioSystem(double alpha, double c_max, double detachment_rate){
+    public BioSystem(double alpha, double c_max, double detachment_rate){
 
         this.K = 120;
         this.alpha = alpha;
@@ -52,7 +52,7 @@ public class BioSystem {
 
         microhabitats.get(0).setSurface(true);
         microhabitats.get(0).addARandomBacterium_x_N(5);
-    }*/
+    }
 
 
 
@@ -351,6 +351,7 @@ public class BioSystem {
         double c_max = 10., alpha = 0.01;
 
         BioSystem bs = new BioSystem(alpha, c_max);
+        System.out.println("detach_rate: "+bs.deterioration_rate);
         int nUpdates = 20;
         double interval = duration/nUpdates;
         boolean alreadyRecorded = false;
@@ -505,10 +506,10 @@ public class BioSystem {
     }
 
 
-   /* public static int[] optimalDetachmentSubSubroutine(double d_rate, double timelimit, int i){
+    public static int[] optimalDetachmentSubSubroutine(double d_rate, double timelimit, int i){
         //this plays a biosystem to completion of one rep for a specified detachment rate
         //returns the thickness and pop size of this one rep
-        double alpha = 0.01, c_max = 0.;
+        double alpha = 0.0, c_max = 0.;
         boolean alreadyRecorded = false;
         int nMeasurements = 10;
         double interval = timelimit/nMeasurements;
@@ -550,6 +551,7 @@ public class BioSystem {
 
         double[] thickness_avg_stDev = Toolbox.averageAndStDevOfArray(bf_thicknesses);
         double[] popsize_avg_stDev = Toolbox.averageAndStDevOfArray(pop_sizes);
+
         double thickness_avg = thickness_avg_stDev[0], thickness_stDev = thickness_avg_stDev[1];
         double popsize_avg = popsize_avg_stDev[0], popsize_stDev = popsize_avg_stDev[1];
 
@@ -560,12 +562,13 @@ public class BioSystem {
 
     public static void findOptimalDetachmentRate(){
 
-        double min_detachment = 0.051, max_detachment = 0.0525, detach_increment = 0.0001;
-        int n_detachments = (int)((max_detachment-min_detachment)/detach_increment);
+        double min_detachment = 0.01, max_detachment = 0.08;
+        int n_detachments = 20; //number of detachment rates measured
+        double detach_increment = (max_detachment-min_detachment)/(double)n_detachments;
         int nReps = 20;
-        double duration = 240.;
+        double duration = 240.; //10 days
 
-        String filename = "optimal_detach_rates-thickness-popSize-precisest-w_errors-secondInterval";
+        String filename = "optimal_detach_rates-range="+min_detachment+"_"+detach_increment+"_"+max_detachment+"REDO";
 
         double[] dRateArray = new double[n_detachments+1];
         double[] thickness_array_avg = new double[n_detachments+1];
@@ -588,5 +591,4 @@ public class BioSystem {
 
         Toolbox.writeMultipleColumnsToFile(filename, collated_results);
     }
-*/
 }
