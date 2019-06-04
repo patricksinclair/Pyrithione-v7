@@ -562,6 +562,8 @@ public class BioSystem {
 
     public static void findOptimalDetachmentRate(){
 
+        long startTime = System.currentTimeMillis();
+
         double min_detachment = 0.01, max_detachment = 0.08;
         int n_detachments = 20; //number of detachment rates measured
         double detach_increment = (max_detachment-min_detachment)/(double)n_detachments;
@@ -590,5 +592,10 @@ public class BioSystem {
         double[][] collated_results = new double[][]{dRateArray, thickness_array_avg, thickness_array_stDev, popsize_array_avg, popsize_array_stDev};
 
         Toolbox.writeMultipleColumnsToFile(filename, collated_results);
+
+        long finishTime = System.currentTimeMillis();
+        String diff = Toolbox.millisToShortDHMS(finishTime - startTime);
+        System.out.println("results written to file");
+        System.out.println("Time taken: "+diff);
     }
 }
