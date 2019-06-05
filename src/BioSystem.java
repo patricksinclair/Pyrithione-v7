@@ -564,13 +564,15 @@ public class BioSystem {
 
         long startTime = System.currentTimeMillis();
 
-        double min_detachment = 0.01, max_detachment = 0.08;
-        int n_detachments = 20; //number of detachment rates measured
+        double min_detachment = 0.0485, max_detachment = 0.053;
+        int n_detachments = 24; //number of detachment rates measured
         double detach_increment = (max_detachment-min_detachment)/(double)n_detachments;
         int nReps = 20;
         double duration = 240.; //10 days
 
-        String filename = "optimal_detach_rates-range="+min_detachment+"_"+detach_increment+"_"+max_detachment+"REDO";
+
+
+        String filename = String.format("optimal_detach_rates-range=%.5f_%.5f_%.5f-REDO", min_detachment, detach_increment, max_detachment);
 
         double[] dRateArray = new double[n_detachments+1];
         double[] thickness_array_avg = new double[n_detachments+1];
