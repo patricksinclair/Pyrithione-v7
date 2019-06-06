@@ -170,10 +170,10 @@ public class BioSystem {
     public void performAction(){
         //make a copy of the microhabitats
         //todo does this actually need to be done?
-        ArrayList<Microhabitat> updated_microhabs = new ArrayList<>(microhabitats.size());
+        /*ArrayList<Microhabitat> updated_microhabs = new ArrayList<>(microhabitats.size());
         for(Microhabitat m : microhabitats){
-            updated_microhabs.add(new Microhabitat(m));
-        }
+            //updated_microhabs.add(new Microhabitat(m));
+        }*/
 
         double tau_step = tau;
 
@@ -564,7 +564,7 @@ public class BioSystem {
 
         long startTime = System.currentTimeMillis();
 
-        double min_detachment = 0.0485, max_detachment = 0.053;
+        double min_detachment = 0.0515, max_detachment = 0.0517;
         int n_detachments = 24; //number of detachment rates measured
         double detach_increment = (max_detachment-min_detachment)/(double)n_detachments;
         int nReps = 20;
