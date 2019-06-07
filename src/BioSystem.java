@@ -31,7 +31,7 @@ public class BioSystem {
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
-        this.deterioration_rate = 0.0516;
+        this.deterioration_rate = 1.e-9;
 
         microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
         microhabitats.get(0).setSurface(true);
@@ -387,7 +387,7 @@ public class BioSystem {
 
 
         int[] mh_index_reached = new int[nReps];
-        String index_reached_filename = "pyrithione-testing-mh_index_reached_histo-t="+String.valueOf(duration)+"-parallel";
+        String index_reached_filename = "pyrithione-bf-thickness_histo-t="+String.valueOf(duration)+"-parallel-drate_miniscule";
 
         for(int j = 0; j < nSections; j++){
             IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i -> mh_index_reached[i] = BioSystem.getThicknessReachedAfterATime(duration, i));
