@@ -200,7 +200,7 @@ public class Toolbox {
     }
 
 
-    public static void writeMultipleColumnsToFile(String filename, double[][] results){
+    public static void writeMultipleColumnsToFile(String filename, String[] headers, double[][] results){
 
         try{
             File file = new File(filename+".txt");
@@ -210,13 +210,21 @@ public class Toolbox {
             BufferedWriter bw = new BufferedWriter(fw);
 
             int ncols = results.length;
-
+            int string_length = 12;
+            String file_header = "#";
+            for(int i = 0; i < headers.length-1; i++){
+                file_header += String.format("%-"+string_length+"s, ", headers[i]);
+            }
+            file_header += String.format("%-"+string_length+"s", headers[headers.length-1]);
+            bw.write(file_header);
+            bw.newLine();
 
             for(int i = 0; i < results[0].length; i++){
 
                 String output = "";
 
                 for(int nc = 0; nc < ncols-1; nc++){
+                    String num_val = String.format()
                     output += String.format("%.4f, ", results[nc][i]);
                 }
                 output += String.format("%.7f", results[ncols-1][i]);

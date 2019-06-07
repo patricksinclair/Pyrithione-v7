@@ -509,7 +509,7 @@ public class BioSystem {
     public static int[] optimalDetachmentSubSubroutine(double d_rate, double timelimit, int i){
         //this plays a biosystem to completion of one rep for a specified detachment rate
         //returns the thickness and pop size of this one rep
-        double alpha = 0.0, c_max = 0.;
+        double alpha = 0.01, c_max = 10.;
         boolean alreadyRecorded = false;
         int nMeasurements = 10;
         double interval = timelimit/nMeasurements;
@@ -520,7 +520,7 @@ public class BioSystem {
             if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
 
                 int total_N = bs.getTotalN();
-                System.out.println("d_rate: "+bs.getDeterioration_rate()+"\trep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"\tbf_edge: "+bs.getBiofilmEdge());
+                System.out.println("d_rate: "+bs.getDeterioration_rate()+"\trep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+total_N+"\tbf_edge: "+bs.getBiofilmEdge()+"\tc_max: "+bs.c_max);
                 alreadyRecorded = true;
             }
 
@@ -540,7 +540,7 @@ public class BioSystem {
         int[][] sub_results = new int[nReps][];
         double[] bf_thicknesses = new double[nReps];
         double[] pop_sizes = new double[nReps];
-        double alpha = 0.01, c_max = 0.;
+        double alpha = 0.01, c_max = 10.;
 
         IntStream.range(0, nReps).parallel().forEach(i -> sub_results[i] = BioSystem.optimalDetachmentSubSubroutine(d_rate, timelimit, i));
 
@@ -564,15 +564,17 @@ public class BioSystem {
 
         long startTime = System.currentTimeMillis();
 
-        double min_detachment = 0.0515, max_detachment = 0.0517;
-        int n_detachments = 24; //number of detachment rates measured
+        double min_detachment = 0.0001, max_detachment = 0.05;
+        int n_detachments = 100; //number of detachment rates measured
         double detach_increment = (max_detachment-min_detachment)/(double)n_detachments;
-        int nReps = 20;
+        int nReps = 24;
         double duration = 240.; //10 days
 
 
 
-        String filename = String.format("optimal_detach_rates-range=%.5f_%.5f_%.5f-REDO", min_detachment, detach_increment, max_detachment);
+        String filename = String.format("optimal_detach_rates-range=%.5f_%.5f_%.5f-with_chemicals", min_detachment, detach_increment, max_detachment);
+        String[] headers = new String[]{"det rate", "thickness", "thck errs", "pop size", "pop errs"};
+
 
         double[] dRateArray = new double[n_detachments+1];
         double[] thickness_array_avg = new double[n_detachments+1];
@@ -593,7 +595,7 @@ public class BioSystem {
 
         double[][] collated_results = new double[][]{dRateArray, thickness_array_avg, thickness_array_stDev, popsize_array_avg, popsize_array_stDev};
 
-        Toolbox.writeMultipleColumnsToFile(filename, collated_results);
+        Toolbox.writeMultipleColumnsToFile(filename, headers, collated_results);
 
         long finishTime = System.currentTimeMillis();
         String diff = Toolbox.millisToShortDHMS(finishTime - startTime);
