@@ -219,7 +219,7 @@ public class Toolbox {
                 for(int nc = 0; nc < ncols-1; nc++){
                     output += String.format("%.4f, ", results[nc][i]);
                 }
-                output += String.format("%.4f", results[ncols-1][i]);
+                output += String.format("%.7f", results[ncols-1][i]);
 
                 bw.write(output);
                 bw.newLine();

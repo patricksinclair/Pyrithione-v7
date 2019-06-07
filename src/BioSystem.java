@@ -17,7 +17,7 @@ public class BioSystem {
     private double tau = 0.01; //timestep used in tau-leaping
     private double immigration_rate =  0.8;
     private double migration_rate = 0.2;
-    private double deterioration_rate = 0.04;
+    private double deterioration_rate;
     private double delta_x = 5.;
     private int immigration_index, biofilm_edge_index;
     //private int no_of_detachments = 0;
@@ -27,11 +27,11 @@ public class BioSystem {
 
         this.K = 120;
         this.alpha = alpha;
-        this.c_max = 0.;
+        this.c_max = c_max;
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
-        //this.deterioration_rate = 0.0522;
+        this.deterioration_rate = 0.0516;
 
         microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
         microhabitats.get(0).setSurface(true);
@@ -363,6 +363,8 @@ public class BioSystem {
 
                 int max_poss_pop = bs.getBiofilmThickness()*K;
                 System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
+                System.out.println("\nconcn profile");
+                System.out.println(Arrays.toString(bs.concnProfile()));
                 alreadyRecorded = true;
             }
             if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;

@@ -6,8 +6,8 @@ public class PyrithioneMain {
         //System.out.println("precisest d_rate, second attempt");
         //BioSystem.tester();
         //System.out.println("Biofilm thickness histogram");
-        //BioSystem.getBiofilmThicknessHistoInParallel(96);
-        System.out.println("Biofilm det rate optimal - preciserest");
-        BioSystem.findOptimalDetachmentRate();
+        BioSystem.getBiofilmThicknessHistoInParallel(96);
+        //System.out.println("Biofilm det rate optimal - preciserest");
+        //BioSystem.findOptimalDetachmentRate();
     }
 }
