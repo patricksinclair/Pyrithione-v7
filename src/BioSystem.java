@@ -363,8 +363,6 @@ public class BioSystem {
 
                 int max_poss_pop = bs.getBiofilmThickness()*K;
                 System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
-                System.out.println("\nconcn profile");
-                System.out.println(Arrays.toString(bs.concnProfile()));
                 alreadyRecorded = true;
             }
             if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
