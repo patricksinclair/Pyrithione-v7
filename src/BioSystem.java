@@ -20,6 +20,7 @@ public class BioSystem {
     private double deterioration_rate;
     private double delta_x = 5.;
     private int immigration_index, biofilm_edge_index;
+    private int n_detachments = 0, n_deaths = 0, n_replications = 0;
     //private int no_of_detachments = 0;
 
 
@@ -31,7 +32,7 @@ public class BioSystem {
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
-        this.deterioration_rate = 1.e-9;
+        this.deterioration_rate = 0.0516;
 
         microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
         microhabitats.get(0).setSurface(true);
@@ -42,7 +43,7 @@ public class BioSystem {
 
         this.K = 120;
         this.alpha = alpha;
-        this.c_max = 0;
+        this.c_max = c_max;
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
@@ -55,6 +56,9 @@ public class BioSystem {
     }
 
 
+    public int getN_detachments(){return n_detachments;}
+    public int getN_deaths(){return n_deaths;}
+    public int getN_replications(){return n_replications;}
 
 
     public double getTimeElapsed(){
@@ -270,17 +274,24 @@ public class BioSystem {
         for(int mh_index = 0; mh_index < system_size; mh_index++){
             for(int bac_index = original_popsizes[mh_index]-1; bac_index >= 0; bac_index--){
 
-                if(death_allocations[mh_index][bac_index]!= 0) microhabitats.get(mh_index).removeABacterium(bac_index);
+                if(death_allocations[mh_index][bac_index]!= 0) {
+                    microhabitats.get(mh_index).removeABacterium(bac_index);
+                    n_deaths++;
+                }
 
                 else{
                     microhabitats.get(mh_index).replicateABacterium_x_N(bac_index, replication_allocations[mh_index][bac_index]);
+                    n_replications += replication_allocations[mh_index][bac_index];
 
                     if(system_size > 1){
                         if(migration_allocations[mh_index][bac_index] != 0) migrate(microhabitats, mh_index, bac_index);
                     }
 
                     if(mh_index == immigration_index){
-                        if(detachment_allocations[bac_index] != 0) microhabitats.get(mh_index).removeABacterium(bac_index);
+                        if(detachment_allocations[bac_index] != 0) {
+                            microhabitats.get(mh_index).removeABacterium(bac_index);
+                            n_detachments++;
+                        }
                     }
                 }
             }
@@ -565,7 +576,7 @@ public class BioSystem {
         long startTime = System.currentTimeMillis();
 
         double min_detachment = 0.0001, max_detachment = 0.05;
-        int n_detachments = 64; //number of detachment rates measured
+        int n_detachments = 40; //number of detachment rates measured
         double detach_increment = (max_detachment-min_detachment)/(double)n_detachments;
         int nReps = 24;
         double duration = 240.; //10 days

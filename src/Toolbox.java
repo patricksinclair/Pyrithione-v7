@@ -213,7 +213,7 @@ public class Toolbox {
             int string_length = 12;
             String file_header = "#";
             for(int i = 0; i < headers.length-1; i++){
-                file_header += String.format("%-"+string_length+"s,", headers[i]);
+                file_header += String.format("%-"+string_length+"s", headers[i]+",");
             }
             file_header += String.format("%-"+string_length+"s", headers[headers.length-1]);
             bw.write(file_header);
