@@ -357,7 +357,7 @@ public class BioSystem {
 
 
 
-    public static int getThicknessReachedAfterATime(double duration, int i){
+    public static int[] getThicknessAndEventCountersReachedAfterATime(double duration, int i){
         int K = 120;
         double c_max = 10., alpha = 0.01;
 
@@ -382,7 +382,7 @@ public class BioSystem {
             bs.performAction();
         }
 
-        return bs.getBiofilmEdge();
+        return new int[]{bs.getBiofilmEdge(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_replications()};
     }
 
 
@@ -396,16 +396,17 @@ public class BioSystem {
 
         double duration = 1680.; //10 week duration
 
+        int[][] index_and_counters_reached = new int[nReps][];
 
-        int[] mh_index_reached = new int[nReps];
-        String index_reached_filename = "pyrithione-bf-thickness_histo-t="+String.valueOf(duration)+"-parallel-drate_miniscule";
+        String index_reached_filename = "pyrithione-bf-thickness_histo-t="+String.valueOf(duration)+"-parallel-event_counters";
+        String[] headers = new String[]{"bf edge", "n_deaths", "n_detachments", "n_replications"};
 
         for(int j = 0; j < nSections; j++){
-            IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i -> mh_index_reached[i] = BioSystem.getThicknessReachedAfterATime(duration, i));
+            IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i -> index_and_counters_reached[i] = BioSystem.getThicknessAndEventCountersReachedAfterATime(duration, i));
         }
 
-
-        Toolbox.writeHistoArrayToFile(index_reached_filename, mh_index_reached);
+        double[][] converted_counters = Toolbox.convert2DIntArrayToDoubleArray(index_and_counters_reached);
+        Toolbox.writeMultipleColumnsToFile(index_reached_filename, headers, converted_counters);
 
         long finishTime = System.currentTimeMillis();
         String diff = Toolbox.millisToShortDHMS(finishTime - startTime);

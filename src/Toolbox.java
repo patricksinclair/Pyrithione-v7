@@ -8,6 +8,18 @@ import java.util.concurrent.TimeUnit;
 public class Toolbox {
 
 
+    public static double[][] convert2DIntArrayToDoubleArray(int[][] source){
+        double[][] result = new double[source.length][];
+        for(int i = 0; i < source.length; i++){
+            double[] sub_result = new double[source[i].length];
+            for(int j = 0; j < source[i].length; j++){
+                sub_result[j] = (double)source[i][j];
+            }
+            result[i] = sub_result;
+        }
+        return result;
+    }
+
 
     public static double averageOfArrayList(ArrayList<Double> listo){
 
@@ -178,26 +190,7 @@ public class Toolbox {
     }
 
 
-    public static void writeThreeArraysToFile(String filename, double[] arr_a, double[] arr_b, double[] arr_c){
 
-        try{
-            File file = new File(filename+".txt");
-            if(!file.exists()) file.createNewFile();
-
-            FileWriter fw = new FileWriter(file.getAbsoluteFile());
-            BufferedWriter bw = new BufferedWriter(fw);
-
-
-            for(int i = 0; i < arr_a.length; i++){
-                String output = String.format("%.3f, %.3f, %.3f", arr_a[i], arr_b[i], arr_c[i]);
-                bw.write(output);
-                bw.newLine();
-            }
-            bw.close();
-
-        }catch (IOException e){}
-
-    }
 
 
     public static void writeMultipleColumnsToFile(String filename, String[] headers, double[][] results){
@@ -210,7 +203,7 @@ public class Toolbox {
             BufferedWriter bw = new BufferedWriter(fw);
 
             int ncols = results.length;
-            int string_length = 12;
+            int string_length = 15;
             String file_header = "#";
             for(int i = 0; i < headers.length-1; i++){
                 file_header += String.format("%-"+string_length+"s", headers[i]+",");
