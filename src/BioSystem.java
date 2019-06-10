@@ -402,11 +402,11 @@ public class BioSystem {
         String[] headers = new String[]{"bf edge", "n_deaths", "n_detachments", "n_replications"};
 
         for(int j = 0; j < nSections; j++){
+            System.out.println("section: "+j);
             IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i -> index_and_counters_reached[i] = BioSystem.getThicknessAndEventCountersReachedAfterATime(duration, i));
         }
 
-        double[][] converted_counters = Toolbox.convert2DIntArrayToDoubleArray(index_and_counters_reached);
-        Toolbox.writeMultipleColumnsToFile(index_reached_filename, headers, converted_counters);
+        Toolbox.writeCountersToFile(index_reached_filename, headers, index_and_counters_reached);
 
         long finishTime = System.currentTimeMillis();
         String diff = Toolbox.millisToShortDHMS(finishTime - startTime);

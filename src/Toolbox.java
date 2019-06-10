@@ -20,6 +20,13 @@ public class Toolbox {
         return result;
     }
 
+    public static int largestHeaderLength(String[] headers){
+        int biggun = 0;
+        for(String s : headers){
+            if(s.length() > biggun) biggun = s.length();
+        }
+        return biggun;
+    }
 
     public static double averageOfArrayList(ArrayList<Double> listo){
 
@@ -202,13 +209,16 @@ public class Toolbox {
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
 
-            int ncols = results.length;
-            int string_length = 15;
-            String file_header = "#";
-            for(int i = 0; i < headers.length-1; i++){
-                file_header += String.format("%-"+string_length+"s", headers[i]+",");
+            int ncols = headers.length;
+            int string_length = Math.max(12, Toolbox.largestHeaderLength(headers)+3);
+            String head_start = "#"+headers[0]+",";
+            String file_header = String.format("%-"+string_length+"s", head_start);
+            for(int i = 1; i < headers.length-1; i++){
+                String heado = headers[i]+",";
+                file_header += String.format("%-"+string_length+"s", heado);
             }
-            file_header += String.format("%-"+string_length+"s", headers[headers.length-1]);
+            String heado = headers[headers.length-1]+",";
+            file_header += String.format("%-"+string_length+"s", heado);
             bw.write(file_header);
             bw.newLine();
 
@@ -230,6 +240,50 @@ public class Toolbox {
             bw.close();
 
         }catch (IOException e){}
+    }
+
+
+
+    public static void writeCountersToFile(String filename, String[] headers, int[][] counters){
+        try{
+            File file = new File(filename+".txt");
+            if(!file.exists()) file.createNewFile();
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            int ncols = headers.length;
+            int string_length = Math.max(12, Toolbox.largestHeaderLength(headers)+3);
+            String head_start = "#"+headers[0]+",";
+            String file_header = String.format("%-"+string_length+"s", head_start);
+            for(int i = 1; i < headers.length-1; i++){
+                String heado = headers[i]+",";
+                file_header += String.format("%-"+string_length+"s", heado);
+            }
+            String heado = headers[headers.length-1]+",";
+            file_header += String.format("%-"+string_length+"s", heado);
+            bw.write(file_header);
+            bw.newLine();
+
+
+            for(int i = 0; i < counters.length; i++){
+
+                String output = "";
+
+                for(int nc = 0; nc < ncols-1; nc++){
+                    String num_val = String.format("%d", counters[i][nc])+",";
+                    output += String.format("%-"+string_length+"s", num_val);
+                }
+                String num_val = String.format("%d", counters[i][ncols-1]);
+                output += String.format("%-"+string_length+"s", num_val);
+
+                bw.write(output);
+                bw.newLine();
+            }
+            bw.close();
+
+        }catch (IOException e){}
+
     }
 
 
