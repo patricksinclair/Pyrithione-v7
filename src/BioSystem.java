@@ -565,7 +565,7 @@ public class BioSystem {
         long startTime = System.currentTimeMillis();
 
         double min_detachment = 0.0001, max_detachment = 0.05;
-        int n_detachments = 100; //number of detachment rates measured
+        int n_detachments = 64; //number of detachment rates measured
         double detach_increment = (max_detachment-min_detachment)/(double)n_detachments;
         int nReps = 24;
         double duration = 240.; //10 days

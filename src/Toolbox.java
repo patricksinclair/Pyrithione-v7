@@ -213,21 +213,23 @@ public class Toolbox {
             int string_length = 12;
             String file_header = "#";
             for(int i = 0; i < headers.length-1; i++){
-                file_header += String.format("%-"+string_length+"s, ", headers[i]);
+                file_header += String.format("%-"+string_length+"s,", headers[i]);
             }
             file_header += String.format("%-"+string_length+"s", headers[headers.length-1]);
             bw.write(file_header);
             bw.newLine();
+
 
             for(int i = 0; i < results[0].length; i++){
 
                 String output = "";
 
                 for(int nc = 0; nc < ncols-1; nc++){
-                    String num_val = String.format()
-                    output += String.format("%.4f, ", results[nc][i]);
+                    String num_val = String.format("%.4E", results[nc][i])+",";
+                    output += String.format("%-"+string_length+"s", num_val);
                 }
-                output += String.format("%.7f", results[ncols-1][i]);
+                String num_val = String.format("%.4E", results[ncols-1][i]);
+                output += String.format("%-"+string_length+"s", num_val);
 
                 bw.write(output);
                 bw.newLine();
