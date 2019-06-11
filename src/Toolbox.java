@@ -217,7 +217,7 @@ public class Toolbox {
                 String heado = headers[i]+",";
                 file_header += String.format("%-"+string_length+"s", heado);
             }
-            String heado = headers[headers.length-1]+",";
+            String heado = headers[headers.length-1];
             file_header += String.format("%-"+string_length+"s", heado);
             bw.write(file_header);
             bw.newLine();
