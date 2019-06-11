@@ -20,7 +20,7 @@ public class BioSystem {
     private double deterioration_rate;
     private double delta_x = 5.;
     private int immigration_index, biofilm_edge_index;
-    private int n_detachments = 0, n_deaths = 0, n_replications = 0;
+    private int n_detachments = 0, n_deaths = 0, n_replications = 0, n_immigrations = 0;
     //private int no_of_detachments = 0;
 
 
@@ -32,7 +32,7 @@ public class BioSystem {
         this.microhabitats = new ArrayList<>();
         this.timeElapsed = 0.;
         this.immigration_index = 0;
-        this.deterioration_rate = 0.0516;
+        this.deterioration_rate = 0.0001;
 
         microhabitats.add(new Microhabitat(K, calc_C_i(0, this.c_max, this.alpha, delta_x), migration_rate));
         microhabitats.get(0).setSurface(true);
@@ -59,6 +59,7 @@ public class BioSystem {
     public int getN_detachments(){return n_detachments;}
     public int getN_deaths(){return n_deaths;}
     public int getN_replications(){return n_replications;}
+    public int getN_immigrations(){return n_immigrations;}
 
 
     public double getTimeElapsed(){
@@ -301,6 +302,7 @@ public class BioSystem {
         //System.out.println("\ndetachments");
         //System.out.println(Arrays.toString(detachment_allocations) + "\n");
         immigrate(immigration_index, n_immigrants);
+        n_immigrations += n_immigrants;
         updateBiofilmSize();
         timeElapsed += tau_step;
 
@@ -382,7 +384,7 @@ public class BioSystem {
             bs.performAction();
         }
 
-        return new int[]{bs.getBiofilmEdge(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_replications()};
+        return new int[]{bs.getBiofilmEdge(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications()};
     }
 
 
@@ -399,7 +401,7 @@ public class BioSystem {
         int[][] index_and_counters_reached = new int[nReps][];
 
         String index_reached_filename = "pyrithione-bf-thickness_histo-t="+String.valueOf(duration)+"-parallel-event_counters";
-        String[] headers = new String[]{"bf edge", "n_deaths", "n_detachments", "n_replications"};
+        String[] headers = new String[]{"bf edge", "n_deaths", "n_detachments", "n_immigrations", "n_replications"};
 
         for(int j = 0; j < nSections; j++){
             System.out.println("section: "+j);
